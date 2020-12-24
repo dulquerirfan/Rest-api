@@ -5,6 +5,7 @@ const key=require('../setup/myurl');
 const passport=require('passport');
 const jwt=require('jsonwebtoken');
 
+
 //get the modal
 const user=require('../models/user');
 //@type : post
@@ -49,47 +50,54 @@ router.post('/register',(req,res)=>{
     //@desc : route for login using passport
     //@route : /api/login
     //@access : private
+    
   router.post('/login',passport.authenticate('jwt',{session:false}),(req,res)=>{
      const email=req.body.email;
      const password=req.body.password;
-     user.findOne({email})
-     .then( (person)=>{
-       if(!person){
-         res.status(400).json({message:"you haven't registered yet"});
-       }
-       
-       bcrypt.compare(password,user.password)
-       .then(isCorrect=>{
-         if(isCorrect){
-           res.json({suceess:"your able to login"});
-          const payload={
-             id:user.id,
-             username:user.email,
-             password:user.password
-
-           };
-           jwt.sign(
-             payload,
-             key.key,
-             {expiresIn : 3000},
-             (err,token)=>{
-               res.json({
-                 success:true,
-                 token:"Bearer"+token
-               })
-             }
-           );
-         }
-         else{
-           res.status(400).json({passwordError:"password is worong"})
-         }
-       })
-       .catch(err=>{
-         console.log(err);
-         console.log('problem is here');
-       })
-     }) 
-     .catch(err=>console.log(err));
+     try{
+      user.findOne({email})
+      .then( (person)=>{
+        if(!person){
+          res.status(400).json({message:"you haven't registered yet"});
+        }
+        
+        bcrypt.compare(password,user.password)
+        .then(isCorrect=>{
+          if(isCorrect){
+            res.json({suceess:"your able to login"});
+           const payload={
+              id:user.id,
+              username:user.email,
+              password:user.password
+ 
+            };
+            jwt.sign(
+              payload,
+              key.key,
+              {expiresIn : 3000},
+              (err,token)=>{
+                res.json({
+                  success:true,
+                  token:"Bearer"+token
+                })
+              }
+            );
+          }
+          else{
+            res.status(400).json({passwordError:"password is worong"})
+          }
+        })
+        .catch(err=>{
+          console.log(err);
+          console.log('problem is here');
+        })
+      }) 
+      .catch(err=>console.log(err));
+      
+     }
+     catch(err){
+  console.log(err);
+     }
      
   })
     
